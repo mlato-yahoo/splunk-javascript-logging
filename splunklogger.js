@@ -144,7 +144,8 @@ var defaultConfig = {
     maxRetries: 0,
     batchInterval: 0,
     maxBatchSize: 0,
-    maxBatchCount: 1
+    maxBatchCount: 1,
+    api: ""
 };
 
 var defaultRequestOptions = {
@@ -222,31 +223,32 @@ SplunkLogger.prototype._initializeConfig = function(config) {
     }
     else {
         // Specifying the url will override host, port, scheme, & path if possible
-        if (config.url) {
-            var parsed = url.parse(config.url);
+        // if (config.url) {
+        //     var parsed = url.parse(config.url);
 
-            // Ignore the path if it's just "/"
-            var pathIsNotSlash = parsed.path && parsed.path !== "/";
+        //     // Ignore the path if it's just "/"
+        //     var pathIsNotSlash = parsed.path && parsed.path !== "/";
 
-            if (parsed.protocol) {
-                config.protocol = parsed.protocol.replace(":", "");
-            }
-            if (parsed.port) {
-                config.port = parsed.port;
-            }
-            if (parsed.hostname && parsed.path) {
-                config.host = parsed.hostname;
-                if (pathIsNotSlash) {
-                    config.path = parsed.path;
-                }
-            }
-            else if (pathIsNotSlash) {
-                // If hostname isn't set, but path is assume path is the host
-                config.host = parsed.path;
-            }
-        }
+        //     if (parsed.protocol) {
+        //         config.protocol = parsed.protocol.replace(":", "");
+        //     }
+        //     if (parsed.port) {
+        //         config.port = parsed.port;
+        //     }
+        //     if (parsed.hostname && parsed.path) {
+        //         config.host = parsed.hostname;
+        //         if (pathIsNotSlash) {
+        //             config.path = parsed.path;
+        //         }
+        //     }
+        //     else if (pathIsNotSlash) {
+        //         // If hostname isn't set, but path is assume path is the host
+        //         config.host = parsed.path;
+        //     }
+        // }
 
         // Take the argument's value, then instance value, then the default value
+        ret.api = utils.orByProp("api", config, ret, defaultConfig);
         ret.token = utils.orByProp("token", config, ret);
         ret.name = utils.orByProp("name", config, ret, defaultConfig);
         ret.level = utils.orByProp("level", config, ret, defaultConfig);
@@ -432,7 +434,7 @@ SplunkLogger.prototype._sendEvents = function(context, callback) {
     // Manually set the content-type header, the default is application/json
     // since json is set to true.
     requestOptions.headers["Content-Type"] = "application/x-www-form-urlencoded";
-    requestOptions.url = this.config.protocol + "://" + this.config.host + ":" + this.config.port + this.config.path;
+    requestOptions.url = this.config.api + this.config.path;
 
     // Initialize the context again, right before using it
     context = this._initializeContext(context);
